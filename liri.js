@@ -2,6 +2,7 @@ require("dotenv").config();
 const keys = require("./key");
 const fs = require("fs");
 const axios = require("axios");
+const moment = require("moment");
 
 const command = process.argv[2];
 const userInput = process.argv.slice(3).join(" ");
@@ -10,7 +11,28 @@ const userInput = process.argv.slice(3).join(" ");
 var Spotify = require('node-spotify-api');
  
 var spotify = new Spotify(keys.spotify);
- 
+
+
+
+function concertThis() {
+    var queryURL = `https://rest.bandsintown.com/artists/${userInput}/events?app_id=codingbootcamp`;
+    
+    console.log(`Searching concert information for ${userInput}`); 
+
+    axios.get(queryURL).then(
+        
+        function(response){
+            console.log('----------');
+            console.log("Venue: " + response.data[0].venue.name);
+            console.log("City: " + response.data[0].venue.city);
+            console.log("Date of the Event: " + moment(response.data[0].datetime).format("MM/DD/YYYY"));
+        }
+    ).catch((error)=> {
+        console.log(`Error: ${error}`);
+
+    });
+};
+
 function spotifyThisSong() {
     spotify.search({ type: 'track', query: userInput, limit: 1 }, function(err, data) {
         console.log(`Searching for ${userInput}...`); 
@@ -29,6 +51,8 @@ function spotifyThisSong() {
 function userCommand(command) {
     if (command === "spotify-this-song") {
         spotifyThisSong();
+    } else if (command === "concert-this") {
+        concertThis();
     }
 }
 userCommand(command);
